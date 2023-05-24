@@ -1,7 +1,7 @@
 {
 	"texture_size": [512, 512],
 	"textures": {
-		"all": "mineral_zafiro_impuro",
+		"all": "rpgcraftmod:block/bloque_profundo_mineral_zafiro"
 	},
 	"elements": [
 		{

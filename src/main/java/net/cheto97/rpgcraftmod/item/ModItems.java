@@ -36,7 +36,6 @@ public class ModItems {
                     .fireResistant()
                     .durability(9999)
                     .rarity(Rarity.EPIC)
-                    .stacksTo(1)
             ));
 
     public static final RegistryObject<Item> espada_muerte = ITEMS.register("espada_muerte",
@@ -45,7 +44,6 @@ public class ModItems {
                     .fireResistant()
                     .durability(9999)
                     .rarity(Rarity.EPIC)
-                    .stacksTo(1)
             ));
 
     public static void register(IEventBus eventBus){
