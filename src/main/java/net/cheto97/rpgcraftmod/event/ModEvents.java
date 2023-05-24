@@ -1,25 +1,61 @@
 package net.cheto97.rpgcraftmod.event;
 
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.cheto97.rpgcraftmod.RpgcraftMod;
+import net.cheto97.rpgcraftmod.block.ModBlocks;
 import net.cheto97.rpgcraftmod.customstats.Mana;
+import net.cheto97.rpgcraftmod.item.ModItems;
 import net.cheto97.rpgcraftmod.providers.ManaProvider;
+import net.cheto97.rpgcraftmod.villager.ModVillagers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.List;
+
 @Mod.EventBusSubscriber(modid = RpgcraftMod.MOD_ID)
 public class ModEvents {
+
+    @SubscribeEvent
+    public static void addCustomTrades(VillagerTradesEvent event){
+        if(event.getType() == VillagerProfession.TOOLSMITH){
+            Int2ObjectMap<List<VillagerTrades.ItemListing>> trades = event.getTrades();
+            ItemStack stack = new ItemStack(ModItems.espada_muerte.get(),1);
+            int villagerLevel = 1;
+
+            trades.get(villagerLevel).add((trader,rand) -> new MerchantOffer(
+               new ItemStack(ModItems.zafiro.get(),2),
+               stack,10,8,0.02F));
+        }
+
+        if(event.getType() == ModVillagers.MAGIC_MASTER.get()){
+            Int2ObjectMap<List<VillagerTrades.ItemListing>> trades = event.getTrades();
+            ItemStack stack = new ItemStack(ModBlocks.bloque_mana.get(),1);
+            int villagerLevel = 1;
+
+            trades.get(villagerLevel).add((trader,rand) -> new MerchantOffer(
+                    new ItemStack(ModBlocks.bloque_profundo_mineral_zafiro.get(),3),
+                    stack,10,8,0.02F
+            ));
+        }
+    }
+
     @SubscribeEvent
     public static void onAttachCapabilityEntity(AttachCapabilitiesEvent<Entity> event){
         var obj = event.getObject();

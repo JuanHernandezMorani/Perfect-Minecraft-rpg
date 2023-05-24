@@ -13,5 +13,7 @@
   "block.rpgcraftmod.bloque_zafiro": "Sapphire Block",
   "block.rpgcraftmod.bloque_mana": "Block of Mana",
   "block.rpgcraftmod.bloque_luz_magica": "Magic Lamp Block",
-  "block.rpgcraftmod.blueberry_crop": "Blueberry Crop"
+  "block.rpgcraftmod.blueberry_crop": "Blueberry Crop",
+
+  "entity.minecraft.villager.rpgcraftmod.magic_master": "Magic Master"
 }
