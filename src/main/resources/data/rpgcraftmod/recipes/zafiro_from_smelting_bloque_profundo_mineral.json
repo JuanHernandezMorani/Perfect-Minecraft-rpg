@@ -4,7 +4,7 @@
   "experience": 4.7,
   "group": "zafiro",
   "ingredient": {
-    "item": "rpgcraftmod:bloque_mineral_zafiro"
+    "item": "rpgcraftmod:bloque_profundo_mineral_zafiro"
   },
   "result": "rpgcraftmod:zafiro"
 }

@@ -1,6 +1,7 @@
 package net.cheto97.rpgcraftmod.block;
 
 import net.cheto97.rpgcraftmod.RpgcraftMod;
+import net.cheto97.rpgcraftmod.block.custom.MagicLampBlock;
 import net.cheto97.rpgcraftmod.block.custom.ManaBlock;
 import net.cheto97.rpgcraftmod.custom.ModCreativeModeTab;
 import net.cheto97.rpgcraftmod.item.ModItems;
@@ -57,6 +58,14 @@ public class ModBlocks {
                     .strength(2f)
                     .requiresCorrectToolForDrops()
             ));
+    public static final RegistryObject<Block> bloque_luz_magica = registerBlock("bloque_luz_magica",
+            () -> new MagicLampBlock(BlockBehaviour.Properties.of(Material.FROGLIGHT)
+                    .explosionResistance(99.9f)
+                    .sound(SoundType.LARGE_AMETHYST_BUD)
+                    .strength(2f)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(MagicLampBlock.LIT) ? 15 : 0)
+            ));
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block){
         RegistryObject<T> toReturn = BLOCKS.register(name,block);
@@ -64,11 +73,9 @@ public class ModBlocks {
         return toReturn;
     }
 
-    private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block,
-                                                                            CreativeModeTab tab) {
+    private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block,CreativeModeTab tab) {
         return ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties().tab(tab)));
     }
-
 
     public static void register(IEventBus eventBus){
         BLOCKS.register(eventBus);

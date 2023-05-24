@@ -20,7 +20,7 @@ public class ManaBlock extends Block {
 
     @Override
     public @NotNull InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult blockHitResult) {
-       if(level.isClientSide && hand == InteractionHand.MAIN_HAND){
+       if(!level.isClientSide() && hand == InteractionHand.MAIN_HAND){
            player.sendSystemMessage(Component.literal("Activando gran regeneracion temporal"));
            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200,3));
        }
