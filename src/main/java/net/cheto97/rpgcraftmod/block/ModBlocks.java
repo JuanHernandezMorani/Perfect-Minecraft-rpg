@@ -24,7 +24,7 @@ public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, RpgcraftMod.MOD_ID);
 
-    public static final RegistryObject<Block> bloque_mineral_zafiro = registerBlock("bloque_mineral_zafiro.json",
+    public static final RegistryObject<Block> bloque_mineral_zafiro = registerBlock("bloque_mineral_zafiro",
             () -> new DropExperienceBlock(BlockBehaviour.Properties.of(Material.HEAVY_METAL)
                     .explosionResistance(99.9f)
                     .sound(SoundType.AMETHYST_CLUSTER)
