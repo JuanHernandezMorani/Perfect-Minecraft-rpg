@@ -42,7 +42,7 @@ public class ModBlocks {
                     UniformInt.of(5,15)
             ), ModCreativeModeTab.RPGCRAFT_TAB);
 
-    public static final RegistryObject<Block> bloque_zafiro = registerBlock("bloque_zafiro",
+    public static final RegistryObject<Block> bloque_zafiro = registerBlock("bloque_zafiro.json",
             () -> new Block(BlockBehaviour.Properties.of(Material.HEAVY_METAL)
                     .explosionResistance(99.9f)
                     .sound(SoundType.AMETHYST_CLUSTER)
@@ -56,8 +56,9 @@ public class ModBlocks {
         return toReturn;
     }
 
-    private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block, CreativeModeTab tab){
-        return ModItems.ITEMS.register(name, () -> new BlockItem(block.get(),new Item.Properties().tab(tab)));
+    private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block,
+                                                                            CreativeModeTab tab) {
+        return ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties().tab(tab)));
     }
 
 
