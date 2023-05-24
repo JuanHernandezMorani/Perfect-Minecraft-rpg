@@ -1,12 +1,17 @@
 {
-  "itemGroup.rpgcrafttab": "RPGcraft Mod Tab",
   "item.rpgcraftmod.zafiro": "Sapphire jewel",
   "item.rpgcraftmod.zafiro_crudo": "Raw Sapphire",
   "item.rpgcraftmod.hacha_zafiro": "Sapphire Giant Axe",
+  "item.rpgcraftmod.blueberry": "Blueberry",
+  "item.rpgcraftmod.blueberry_seeds": "Blueberry Seeds",
+  "item.rpgcraftmod.espada_muerte": "Sword of Death",
+
+  "itemGroup.rpgcrafttab": "RPGcraft Mod Tab",
+
   "block.rpgcraftmod.bloque_profundo_mineral_zafiro": "Deepslate Sapphire Ore",
   "block.rpgcraftmod.bloque_mineral_zafiro": "Sapphire Ore",
   "block.rpgcraftmod.bloque_zafiro": "Sapphire Block",
-  "item.rpgcraftmod.espada_muerte": "Sword of Death",
   "block.rpgcraftmod.bloque_mana": "Block of Mana",
-  "block.rpgcraftmod.bloque_luz_magica": "Magic Lamp Block"
+  "block.rpgcraftmod.bloque_luz_magica": "Magic Lamp Block",
+  "block.rpgcraftmod.blueberry_crop": "Blueberry Crop"
 }

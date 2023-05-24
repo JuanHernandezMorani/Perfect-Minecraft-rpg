@@ -1,9 +1,12 @@
 package net.cheto97.rpgcraftmod.item;
 
 import net.cheto97.rpgcraftmod.RpgcraftMod;
+import net.cheto97.rpgcraftmod.block.ModBlocks;
 import net.cheto97.rpgcraftmod.custom.EspadaMuerteItem;
 import net.cheto97.rpgcraftmod.custom.ModCreativeModeTab;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -19,7 +22,7 @@ public class ModItems {
                     .tab(ModCreativeModeTab.RPGCRAFT_TAB)
                     .fireResistant()
                     .rarity(Rarity.EPIC)
-                    .stacksTo(64000)
+                    .stacksTo(64)
             ));
 
     public static final RegistryObject<Item> zafiro_crudo = ITEMS.register("zafiro_crudo",
@@ -27,7 +30,7 @@ public class ModItems {
                     .tab(ModCreativeModeTab.RPGCRAFT_TAB)
                     .fireResistant()
                     .rarity(Rarity.RARE)
-                    .stacksTo(64000)
+                    .stacksTo(64)
             ));
 
     public static final RegistryObject<Item> hacha_zafiro = ITEMS.register("hacha_zafiro",
@@ -45,6 +48,15 @@ public class ModItems {
                     .durability(9999)
                     .rarity(Rarity.EPIC)
             ));
+
+    public static final RegistryObject<Item> BLUEBERRY_SEEDS = ITEMS.register("blueberry_seeds",
+            () -> new ItemNameBlockItem(ModBlocks.BLUEBERRY_CROP.get(),
+                    new Item.Properties().tab(ModCreativeModeTab.RPGCRAFT_TAB)));
+
+    public static final RegistryObject<Item> BLUEBERRY = ITEMS.register("blueberry",
+            () -> new Item(new Item.Properties().tab(ModCreativeModeTab.RPGCRAFT_TAB)
+                    .stacksTo(64)
+                    .food(new FoodProperties.Builder().nutrition(3).saturationMod(3f).build())));
 
     public static void register(IEventBus eventBus){
         ITEMS.register(eventBus);
