@@ -1,6 +1,7 @@
 package net.cheto97.rpgcraftmod.block;
 
 import net.cheto97.rpgcraftmod.RpgcraftMod;
+import net.cheto97.rpgcraftmod.block.custom.ManaBlock;
 import net.cheto97.rpgcraftmod.custom.ModCreativeModeTab;
 import net.cheto97.rpgcraftmod.item.ModItems;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -11,7 +12,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -27,32 +27,40 @@ public class ModBlocks {
     public static final RegistryObject<Block> bloque_mineral_zafiro = registerBlock("bloque_mineral_zafiro",
             () -> new DropExperienceBlock(BlockBehaviour.Properties.of(Material.HEAVY_METAL)
                     .explosionResistance(99.9f)
-                    .sound(SoundType.AMETHYST_CLUSTER)
+                    .sound(SoundType.ANCIENT_DEBRIS)
                     .strength(6f)
                     .requiresCorrectToolForDrops(),
                     UniformInt.of(5,15)
-            ), ModCreativeModeTab.RPGCRAFT_TAB);
+            ));
 
     public static final RegistryObject<Block> bloque_profundo_mineral_zafiro = registerBlock("bloque_profundo_mineral_zafiro",
             () -> new DropExperienceBlock(BlockBehaviour.Properties.of(Material.HEAVY_METAL)
                     .explosionResistance(99.9f)
-                    .sound(SoundType.AMETHYST_CLUSTER)
+                    .sound(SoundType.POLISHED_DEEPSLATE)
                     .strength(6f)
                     .requiresCorrectToolForDrops(),
                     UniformInt.of(5,15)
-            ), ModCreativeModeTab.RPGCRAFT_TAB);
+            ));
 
-    public static final RegistryObject<Block> bloque_zafiro = registerBlock("bloque_zafiro.json",
+    public static final RegistryObject<Block> bloque_zafiro = registerBlock("bloque_zafiro",
             () -> new Block(BlockBehaviour.Properties.of(Material.HEAVY_METAL)
                     .explosionResistance(99.9f)
-                    .sound(SoundType.AMETHYST_CLUSTER)
+                    .sound(SoundType.COPPER)
                     .strength(6f)
                     .requiresCorrectToolForDrops()
-            ), ModCreativeModeTab.RPGCRAFT_TAB);
+            ));
 
-    private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block, CreativeModeTab tab){
+    public static final RegistryObject<Block> bloque_mana = registerBlock("bloque_mana",
+            () -> new ManaBlock(BlockBehaviour.Properties.of(Material.AMETHYST)
+                    .explosionResistance(99.9f)
+                    .sound(SoundType.LARGE_AMETHYST_BUD)
+                    .strength(2f)
+                    .requiresCorrectToolForDrops()
+            ));
+
+    private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block){
         RegistryObject<T> toReturn = BLOCKS.register(name,block);
-        registerBlockItem(name,toReturn,tab);
+        registerBlockItem(name,toReturn, ModCreativeModeTab.RPGCRAFT_TAB);
         return toReturn;
     }
 
