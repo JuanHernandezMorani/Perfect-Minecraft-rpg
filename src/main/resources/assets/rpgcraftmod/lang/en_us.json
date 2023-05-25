@@ -15,5 +15,8 @@
   "block.rpgcraftmod.bloque_luz_magica": "Magic Lamp Block",
   "block.rpgcraftmod.blueberry_crop": "Blueberry Crop",
 
-  "entity.minecraft.villager.rpgcraftmod.magic_master": "Magic Master"
+  "entity.minecraft.villager.rpgcraftmod.magic_master": "Magic Master",
+
+  "key.category.rpgcraftmod.rpgcraft": "Rpgcraft Mod",
+  "key.rpgcraftmod.drink_mana" : "Drink Mana"
 }
