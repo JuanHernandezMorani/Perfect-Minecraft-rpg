@@ -5,6 +5,8 @@ import net.cheto97.rpgcraftmod.block.ModBlocks;
 import net.cheto97.rpgcraftmod.item.ModItems;
 import net.cheto97.rpgcraftmod.painting.ModPaintings;
 import net.cheto97.rpgcraftmod.villager.ModVillagers;
+import net.cheto97.rpgcraftmod.world.feature.ModConfiguredFeatures;
+import net.cheto97.rpgcraftmod.world.feature.ModPlacedFeatures;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,6 +30,8 @@ public class RpgcraftMod{
         ModBlocks.register(modEventBus);
         ModVillagers.register(modEventBus);
         ModPaintings.register(modEventBus);
+        ModConfiguredFeatures.register(modEventBus);
+        ModPlacedFeatures.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 
