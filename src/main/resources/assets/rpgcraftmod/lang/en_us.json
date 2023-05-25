@@ -7,6 +7,7 @@
   "item.rpgcraftmod.espada_muerte": "Sword of Death",
 
   "itemGroup.rpgcrafttab": "RPGcraft Mod Tab",
+  "key.category.rpgcraftmod.rpgcraft": "Rpgcraft Mod",
 
   "block.rpgcraftmod.bloque_profundo_mineral_zafiro": "Deepslate Sapphire Ore",
   "block.rpgcraftmod.bloque_mineral_zafiro": "Sapphire Ore",
@@ -17,6 +18,8 @@
 
   "entity.minecraft.villager.rpgcraftmod.magic_master": "Magic Master",
 
-  "key.category.rpgcraftmod.rpgcraft": "Rpgcraft Mod",
-  "key.rpgcraftmod.drink_mana" : "Drink Mana"
+  "key.rpgcraftmod.drink_mana" : "Drink Mana",
+
+  "message.rpgcraftmod.drink_mana": "Your mana was regenerated",
+  "message.rpgcraftmod.no_mana_fluid_near": "There is no mana fluid nearby to drink"
 }

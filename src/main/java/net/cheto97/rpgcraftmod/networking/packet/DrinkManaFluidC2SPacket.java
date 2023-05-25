@@ -15,7 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 public class DrinkManaFluidC2SPacket {
-    private static final String MESSAGE_DRINK_MANA_FLUID = "You feel how its restore your mana";
+    private static final String MESSAGE_DRINK_MANA_FLUID = "message.rpgcraftmod.drink_mana";
+    private static final String MESSAGE_NO_MANA_FLUID_NEAR = "message.rpgcraftmod.no_mana_fluid_near";
 
     public DrinkManaFluidC2SPacket(){
 
@@ -31,28 +32,28 @@ public class DrinkManaFluidC2SPacket {
 
     public boolean handle(@NotNull Supplier<NetworkEvent.Context> supplier){
         NetworkEvent.Context context = supplier.get();
-        context.enqueueWork(() -> {
+        context.enqueueWork(() -> { // in server!
             ServerPlayer player = context.getSender();
             if(player != null){
-
                 ServerLevel level = player.getLevel();
 
-                if(hasManaWell(player,level,2)){
+                if(hasManaWell(player,level,1)){
                     player.sendSystemMessage(Component.translatable(MESSAGE_DRINK_MANA_FLUID).withStyle(ChatFormatting.BLUE));
 
-                    level.playSound(null, player.getOnPos(), SoundEvents.ALLAY_AMBIENT_WITH_ITEM, SoundSource.PLAYERS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
+                    level.playSound(null, player.getOnPos(), SoundEvents.GENERIC_DRINK, SoundSource.PLAYERS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
 
-                    player.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> mana.add(mana.getMax()/5));
+                   // player.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> mana.add(mana.getMax()/5));
+                }else{
+                    player.sendSystemMessage(Component.translatable(MESSAGE_NO_MANA_FLUID_NEAR).withStyle(ChatFormatting.RED));
                 }
             }
-
         });
         return true;
     }
 
     private boolean hasManaWell(ServerPlayer player, ServerLevel level,int size) {
         return level.getBlockStates(player.getBoundingBox().inflate(size))
-                .filter(state -> state.is(Blocks.LAPIS_BLOCK)).toArray().length > 0;
+                .filter(state -> state.is(Blocks.WATER)).toArray().length > 0;
     }
 
 }

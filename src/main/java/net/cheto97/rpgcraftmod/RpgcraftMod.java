@@ -3,6 +3,7 @@ package net.cheto97.rpgcraftmod;
 import com.mojang.logging.LogUtils;
 import net.cheto97.rpgcraftmod.block.ModBlocks;
 import net.cheto97.rpgcraftmod.item.ModItems;
+import net.cheto97.rpgcraftmod.networking.ModMessages;
 import net.cheto97.rpgcraftmod.painting.ModPaintings;
 import net.cheto97.rpgcraftmod.villager.ModVillagers;
 import net.cheto97.rpgcraftmod.world.feature.ModConfiguredFeatures;
@@ -41,6 +42,8 @@ public class RpgcraftMod{
         event.enqueueWork(() -> {
             ModVillagers.registerPOIs();
         });
+
+        ModMessages.register();
     }
     @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientModEvents{

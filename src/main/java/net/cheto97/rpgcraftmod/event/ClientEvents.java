@@ -1,9 +1,9 @@
 package net.cheto97.rpgcraftmod.event;
 
 import net.cheto97.rpgcraftmod.RpgcraftMod;
+import net.cheto97.rpgcraftmod.networking.ModMessages;
+import net.cheto97.rpgcraftmod.networking.packet.DrinkManaFluidC2SPacket;
 import net.cheto97.rpgcraftmod.util.KeyBinding;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -17,7 +17,7 @@ public class ClientEvents {
         @SubscribeEvent
         public static void onKeyInput(InputEvent.Key event){
             if(KeyBinding.DRINKING_KEY.consumeClick()){
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("Key pressed!"));
+                ModMessages.sendToServer(new DrinkManaFluidC2SPacket());
             }
 
         }
