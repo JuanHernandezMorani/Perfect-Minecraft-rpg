@@ -8,18 +8,17 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class EspadaMuerteItem extends Item {
+public class EspadaMuerteItem extends SwordItem {
 
-    public EspadaMuerteItem(Properties properties) {
-        super(properties);
+    public EspadaMuerteItem(Properties properties, Tier tier) {
+        super(tier,12,1.5f,properties);
     }
 
     @Override
@@ -39,6 +38,11 @@ public class EspadaMuerteItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> components, TooltipFlag flag) {
+        if(!stack.isEnchanted()){
+            stack.enchant(Enchantments.SHARPNESS, 10);
+            stack.enchant(Enchantments.UNBREAKING, 50);
+            stack.enchant(Enchantments.FIRE_ASPECT, 2);
+        }
         if(Screen.hasShiftDown()){
             components.add(Component.literal("Right click to get for 10 seconds:").withStyle(ChatFormatting.AQUA));
             components.add(Component.literal("Life Regeneration III").withStyle(ChatFormatting.DARK_GREEN));

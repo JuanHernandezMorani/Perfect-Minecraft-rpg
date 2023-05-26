@@ -1,6 +1,7 @@
 package net.cheto97.rpgcraftmod.networking.packet;
 
 import net.cheto97.rpgcraftmod.providers.ManaProvider;
+import net.cheto97.rpgcraftmod.providers.ManaRegenerationProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -36,16 +37,23 @@ public class DrinkManaFluidC2SPacket {
             ServerPlayer player = context.getSender();
             if(player != null){
                 ServerLevel level = player.getLevel();
+                player.getCapability(ManaRegenerationProvider.ENTITY_MANAREGENERATION).ifPresent(mpRegen ->{
+                    if(hasManaWell(player,level,1)){
+                        player.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> {
+                            if(mana.get() >= 0){
+                                player.sendSystemMessage(Component.translatable(MESSAGE_DRINK_MANA_FLUID).withStyle(ChatFormatting.BLUE));
 
-                if(hasManaWell(player,level,1)){
-                    player.sendSystemMessage(Component.translatable(MESSAGE_DRINK_MANA_FLUID).withStyle(ChatFormatting.BLUE));
+                                level.playSound(null, player.getOnPos(), SoundEvents.GENERIC_DRINK, SoundSource.PLAYERS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
 
-                    level.playSound(null, player.getOnPos(), SoundEvents.GENERIC_DRINK, SoundSource.PLAYERS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
+                                mana.add(mpRegen.get()*7);
+                            }
+                        });
+                    }else{
+                        player.sendSystemMessage(Component.translatable(MESSAGE_NO_MANA_FLUID_NEAR).withStyle(ChatFormatting.RED));
+                    }
+                });
 
-                   // player.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> mana.add(mana.getMax()/5));
-                }else{
-                    player.sendSystemMessage(Component.translatable(MESSAGE_NO_MANA_FLUID_NEAR).withStyle(ChatFormatting.RED));
-                }
+
             }
         });
         return true;

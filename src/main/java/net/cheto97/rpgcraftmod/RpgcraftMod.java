@@ -8,8 +8,6 @@ import net.cheto97.rpgcraftmod.painting.ModPaintings;
 import net.cheto97.rpgcraftmod.villager.ModVillagers;
 import net.cheto97.rpgcraftmod.world.feature.ModConfiguredFeatures;
 import net.cheto97.rpgcraftmod.world.feature.ModPlacedFeatures;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -41,6 +39,7 @@ public class RpgcraftMod{
     private void commonSetup(final FMLCommonSetupEvent event){
         event.enqueueWork(() -> {
             ModVillagers.registerPOIs();
+
         });
 
         ModMessages.register();

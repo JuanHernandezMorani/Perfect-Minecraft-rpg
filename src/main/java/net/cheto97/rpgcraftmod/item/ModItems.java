@@ -8,12 +8,46 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import org.jetbrains.annotations.NotNull;
 
 public class ModItems {
+    private static Tier tier = new Tier() {
+        @Override
+        public int getUses() {
+            return 0;
+        }
+
+        @Override
+        public float getSpeed() {
+            return 0;
+        }
+
+        @Override
+        public float getAttackDamageBonus() {
+            return 0;
+        }
+
+        @Override
+        public int getLevel() {
+            return 0;
+        }
+
+        @Override
+        public int getEnchantmentValue() {
+            return 0;
+        }
+
+        @Override
+        public @NotNull Ingredient getRepairIngredient() {
+            return Ingredient.of(ModItems.zafiro.get());
+        }
+    };
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, RpgcraftMod.MOD_ID);
 
@@ -46,7 +80,8 @@ public class ModItems {
                     .tab(ModCreativeModeTab.RPGCRAFT_TAB)
                     .fireResistant()
                     .durability(9999)
-                    .rarity(Rarity.EPIC)
+                    .rarity(Rarity.EPIC),
+                    tier
             ));
 
     public static final RegistryObject<Item> BLUEBERRY_SEEDS = ITEMS.register("blueberry_seeds",

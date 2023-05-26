@@ -21,5 +21,6 @@
   "key.rpgcraftmod.drink_mana" : "Drink Mana",
 
   "message.rpgcraftmod.drink_mana": "Your mana was regenerated",
-  "message.rpgcraftmod.no_mana_fluid_near": "There is no mana fluid nearby to drink"
+  "message.rpgcraftmod.no_mana_fluid_near": "There is no mana fluid nearby to drink",
+  "message.rpgcraftmod.not_enough_mana": "You don't have enough mana to do that"
 }
