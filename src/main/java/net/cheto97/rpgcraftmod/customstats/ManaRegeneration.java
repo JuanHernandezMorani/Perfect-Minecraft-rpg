@@ -3,15 +3,14 @@ package net.cheto97.rpgcraftmod.customstats;
 import net.minecraft.nbt.CompoundTag;
 
 public class ManaRegeneration {
-    private int manaregeneration = 1;
-    private final int MIN_VALUE = 0;
+    private double manaregeneration = 1;
 
-    public int get(){
+    public double get(){
         return manaregeneration;
     }
 
-    public int getMin(){
-        return MIN_VALUE;
+    public double getMin(){
+        return 0;
     }
 
     public void increaseMax(){
@@ -22,7 +21,7 @@ public class ManaRegeneration {
         manaregeneration = 1;
     }
 
-    public void add(int value){
+    public void add(double value){
             this.manaregeneration =  this.manaregeneration + value;
     }
 
@@ -30,10 +29,10 @@ public class ManaRegeneration {
         this.manaregeneration = source.manaregeneration;
     }
     public void saveNBTData(CompoundTag nbt){
-        nbt.putInt("manaregeneration",manaregeneration);
+        nbt.putDouble("value",manaregeneration);
     }
     public void loadNBTData(CompoundTag nbt){
-        manaregeneration = nbt.getInt("manaregeneration");
+        manaregeneration = nbt.getDouble("value");
     }
 
 }

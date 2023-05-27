@@ -5,10 +5,7 @@ import net.cheto97.rpgcraftmod.block.ModBlocks;
 import net.cheto97.rpgcraftmod.custom.EspadaMuerteItem;
 import net.cheto97.rpgcraftmod.custom.ModCreativeModeTab;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemNameBlockItem;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -17,7 +14,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
 
 public class ModItems {
-    private static Tier tier = new Tier() {
+    private static final Tier tier = new Tier() {
         @Override
         public int getUses() {
             return 0;
@@ -68,7 +65,9 @@ public class ModItems {
             ));
 
     public static final RegistryObject<Item> hacha_zafiro = ITEMS.register("hacha_zafiro",
-            () -> new Item(new Item.Properties()
+            () -> new AxeItem(
+                    tier,14.0f,-2.0f,
+                    new Item.Properties()
                     .tab(ModCreativeModeTab.RPGCRAFT_TAB)
                     .fireResistant()
                     .durability(9999)

@@ -3,6 +3,7 @@ package net.cheto97.rpgcraftmod.event;
 import net.cheto97.rpgcraftmod.RpgcraftMod;
 import net.cheto97.rpgcraftmod.networking.ModMessages;
 import net.cheto97.rpgcraftmod.networking.packet.DrinkManaFluidC2SPacket;
+import net.cheto97.rpgcraftmod.networking.packet.ViewStatsC2SPacket;
 import net.cheto97.rpgcraftmod.util.KeyBinding;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
@@ -19,6 +20,9 @@ public class ClientEvents {
             if(KeyBinding.DRINKING_KEY.consumeClick()){
                 ModMessages.sendToServer(new DrinkManaFluidC2SPacket());
             }
+            if(KeyBinding.STATS_KEY.consumeClick()){
+                ModMessages.sendToServer(new ViewStatsC2SPacket());
+            }
 
         }
     }
@@ -28,6 +32,7 @@ public class ClientEvents {
         @SubscribeEvent
         public static void onKeyRegister(RegisterKeyMappingsEvent event){
             event.register(KeyBinding.DRINKING_KEY);
+            event.register(KeyBinding.STATS_KEY);
         }
     }
 }

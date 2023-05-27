@@ -3,14 +3,13 @@ package net.cheto97.rpgcraftmod.customstats;
 import net.minecraft.nbt.CompoundTag;
 
 public class Dexterity {
-    private final int MIN_DEXTERITY_VALUE = 1;
-    private int dexterity = 1;
+    private double dexterity = 1;
 
-    public int get(){
+    public double get(){
         return dexterity;
     }
-    public int getMin(){
-        return MIN_DEXTERITY_VALUE;
+    public double getMin(){
+        return 0;
     }
     public void add(){
         dexterity++;
@@ -18,16 +17,16 @@ public class Dexterity {
     public void resetStat(){
         dexterity = 1;
     }
-    public void add(int value){
+    public void add(double value){
         this.dexterity = dexterity + value;
     }
     public void copyFrom(Dexterity source){
         this.dexterity = source.dexterity;
     }
     public void saveNBTData(CompoundTag nbt){
-        nbt.putInt("dexterity",dexterity);
+        nbt.putDouble("value",dexterity);
     }
     public void loadNBTData(CompoundTag nbt){
-        dexterity = nbt.getInt("dexterity");
+        dexterity = nbt.getDouble("value");
     }
 }

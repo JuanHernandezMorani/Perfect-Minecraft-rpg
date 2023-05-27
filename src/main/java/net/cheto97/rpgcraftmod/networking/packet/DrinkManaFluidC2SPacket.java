@@ -33,14 +33,14 @@ public class DrinkManaFluidC2SPacket {
 
     public boolean handle(@NotNull Supplier<NetworkEvent.Context> supplier){
         NetworkEvent.Context context = supplier.get();
-        context.enqueueWork(() -> { // in server!
+        context.enqueueWork(() -> {
             ServerPlayer player = context.getSender();
             if(player != null){
                 ServerLevel level = player.getLevel();
                 player.getCapability(ManaRegenerationProvider.ENTITY_MANAREGENERATION).ifPresent(mpRegen ->{
                     if(hasManaWell(player,level,1)){
                         player.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> {
-                            if(mana.get() >= 0){
+                            if(mana.get() >= 0 && mana.get() < mana.getMax()){
                                 player.sendSystemMessage(Component.translatable(MESSAGE_DRINK_MANA_FLUID).withStyle(ChatFormatting.BLUE));
 
                                 level.playSound(null, player.getOnPos(), SoundEvents.GENERIC_DRINK, SoundSource.PLAYERS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);

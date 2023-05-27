@@ -32,7 +32,7 @@ public class ModConfiguredFeatures {
             OreConfiguration.target(OreFeatures.NETHER_ORE_REPLACEABLES, ModBlocks.bloque_mineral_zafiro.get().defaultBlockState()) ));
 
     public static final RegistryObject<ConfiguredFeature<?, ?>> ZAFIRO_ORE = CONFIGURED_FEATURES.register("zafiro_ore",
-            () -> new ConfiguredFeature<>(Feature.ORE, new OreConfiguration(OVERWORLD_ZAFIRO_ORES.get(), 9)));
+            () -> new ConfiguredFeature<>(Feature.ORE, new OreConfiguration(OVERWORLD_ZAFIRO_ORES.get(), 12)));
     public static final RegistryObject<ConfiguredFeature<?, ?>> END_ZAFIRO_ORE = CONFIGURED_FEATURES.register("end_zafiro_ore",
             () -> new ConfiguredFeature<>(Feature.ORE, new OreConfiguration(END_ZAFIRO_ORES.get(), 9)));
     public static final RegistryObject<ConfiguredFeature<?, ?>> NETHER_ZAFIRO_ORE = CONFIGURED_FEATURES.register("nether_zafiro_ore",

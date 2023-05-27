@@ -3,19 +3,18 @@ package net.cheto97.rpgcraftmod.customstats;
 import net.minecraft.nbt.CompoundTag;
 
 public class Defense {
-    private final int MIN_DEFENSE_VALUE = 1;
-    private int defense = 1;
+    private double defense = 1;
 
-    public int get(){
+    public double get(){
         return defense;
     }
-    public int getMin(){
-        return MIN_DEFENSE_VALUE;
+    public double getMin(){
+        return 0;
     }
     public void resetStat(){
         defense = 1;
     }
-    public void add(int value){
+    public void add(double value){
        this.defense =  this.defense + value;
     }
     public void add(){
@@ -25,9 +24,9 @@ public class Defense {
         this.defense = source.defense;
     }
     public void saveNBTData(CompoundTag nbt){
-        nbt.putInt("defense",defense);
+        nbt.putDouble("value",defense);
     }
     public void loadNBTData(CompoundTag nbt){
-        defense = nbt.getInt("defense");
+        defense = nbt.getDouble("value");
     }
 }

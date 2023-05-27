@@ -18,17 +18,17 @@ import java.util.List;
 public class EspadaMuerteItem extends SwordItem {
 
     public EspadaMuerteItem(Properties properties, Tier tier) {
-        super(tier,12,1.5f,properties);
+        super(tier,2,-1.58f,properties);
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         if(!level.isClientSide() && hand == InteractionHand.MAIN_HAND){
-            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION,200,3));
-            player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE,200,2));
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,200,4));
-            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,200,3));
-            player.addEffect(new MobEffectInstance(MobEffects.JUMP,200,1));
+            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION,400,3));
+            player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE,400,2));
+            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,400,4));
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,400,3));
+            player.addEffect(new MobEffectInstance(MobEffects.JUMP,400,1));
 
             player.getCooldowns().addCooldown(this,1200);
         }
@@ -44,7 +44,7 @@ public class EspadaMuerteItem extends SwordItem {
             stack.enchant(Enchantments.FIRE_ASPECT, 2);
         }
         if(Screen.hasShiftDown()){
-            components.add(Component.literal("Right click to get for 10 seconds:").withStyle(ChatFormatting.AQUA));
+            components.add(Component.literal("Right click to get for 20 seconds:").withStyle(ChatFormatting.AQUA));
             components.add(Component.literal("Life Regeneration III").withStyle(ChatFormatting.DARK_GREEN));
             components.add(Component.literal("Fire Resistance II").withStyle(ChatFormatting.DARK_GREEN));
             components.add(Component.literal("Damage Boost IV").withStyle(ChatFormatting.DARK_GREEN));

@@ -2,6 +2,7 @@ package net.cheto97.rpgcraftmod.networking;
 
 import net.cheto97.rpgcraftmod.RpgcraftMod;
 import net.cheto97.rpgcraftmod.networking.packet.DrinkManaFluidC2SPacket;
+import net.cheto97.rpgcraftmod.networking.packet.ViewStatsC2SPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
@@ -33,6 +34,11 @@ public class ModMessages {
                 .consumerMainThread(DrinkManaFluidC2SPacket::handle)
                 .add();
 
+        net.messageBuilder(ViewStatsC2SPacket.class,id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(ViewStatsC2SPacket::new)
+                .encoder(ViewStatsC2SPacket::toBytes)
+                .consumerMainThread(ViewStatsC2SPacket::handle)
+                .add();
 
     }
 
