@@ -1,6 +1,5 @@
 package net.cheto97.rpgcraftmod.event;
 
-
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.cheto97.rpgcraftmod.RpgcraftMod;
 import net.cheto97.rpgcraftmod.block.ModBlocks;
@@ -14,22 +13,20 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -38,11 +35,11 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Mod.EventBusSubscriber(modid = RpgcraftMod.MOD_ID)
 public class ModEvents {
@@ -50,6 +47,7 @@ public class ModEvents {
     private static final String MESSAGE_LEVEL_TOO_HIGH = "message.rpgcraftmod.level_too_high";
     private static final String MESSAGE_LEVEL_UP = "message.rpgcraft.level_up";
     private static int lvls = 0;
+    private static int lvlReduce = 0;
 
     private static boolean containsIgnoreCase(String str, String searchStr)     {
         if(str == null || searchStr == null) return false;
@@ -94,6 +92,22 @@ public class ModEvents {
 
         DecimalFormat decimalFormat = new DecimalFormat("#,##0.###", symbols);
         return decimalFormat.format(value);
+    }
+
+    private static void setItemName(@NotNull ItemStack itemStack,Component tierAndName) {
+        CompoundTag displayTag = itemStack.getOrCreateTagElement("display");
+        displayTag.putString("Name", Component.Serializer.toJson(tierAndName));
+    }
+
+    private static void setItemLore(@NotNull ItemStack itemStack, String @NotNull ... lore){
+        CompoundTag displayTag = itemStack.getOrCreateTagElement("display");
+        ListTag loreTag = new ListTag();
+        for (String line : lore) {
+            Component loreComponent = Component.literal(line).withStyle(ChatFormatting.LIGHT_PURPLE);
+            StringTag loreStringTag = StringTag.valueOf(Component.Serializer.toJson(loreComponent));
+            loreTag.add(loreStringTag);
+        }
+        displayTag.put("Lore", loreTag);
     }
 
     @SubscribeEvent
@@ -155,7 +169,7 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onPlayerCloned(PlayerEvent.Clone event){
-        if(event.isWasDeath()){
+        if(event.isWasDeath() && !event.getEntity().getLevel().isClientSide()){
             event.getOriginal().getCapability(CustomLevelProvider.ENTITY_CUSTOMLEVEL).ifPresent(oldStore -> {
                 event.getOriginal().getCapability(CustomLevelProvider.ENTITY_CUSTOMLEVEL).ifPresent(newStore -> {
                     newStore.copyFrom(oldStore);
@@ -247,16 +261,23 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onEntityHurt(LivingHurtEvent event){
+        event.setCanceled(true);
         var entity = event.getEntity();
         var source = event.getSource();
         if(entity != null){
             if(source.isMagic()){
                 entity.getCapability(IntelligenceProvider.ENTITY_INTELLIGENCE).ifPresent(stat ->{
                     event.setAmount(event.getAmount() * (float)(stat.get()/1.5));
+                    entity.getCapability(LifeProvider.ENTITY_LIFE).ifPresent(hp ->{
+                        hp.consumeLife(event.getAmount());
+                    });
                 });
             }else{
                 entity.getCapability(StrengthProvider.ENTITY_STRENGTH).ifPresent(stat ->{
                     event.setAmount(event.getAmount() * (float)(stat.get()/2.4));
+                    entity.getCapability(LifeProvider.ENTITY_LIFE).ifPresent(hp ->{
+                        hp.consumeLife(event.getAmount());
+                    });
                 });
             }
         }
@@ -264,6 +285,7 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onEntityDamage(LivingDamageEvent event){
+        event.setCanceled(true);
         var entity = event.getEntity();
         var damage = event.getAmount();
         if(entity != null){
@@ -296,10 +318,9 @@ public class ModEvents {
         if(item.getItem() instanceof PotionItem && event.getEntity() != null){
             if(event.getEntity() instanceof Player){
                 event.getEntity().getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> {
-                    if(mana.get() > 9){
+                    if(mana.get() >= 10.0){
                         mana.consumeMana(10);
                     }else{
-                        event.getEntity().sendSystemMessage(Component.literal("mana: "+mana.get()));
                         event.setCanceled(true);
                         (event.getEntity()).sendSystemMessage(Component.translatable(MESSAGE_NO_ENOUGH_MANA).withStyle(ChatFormatting.DARK_RED));
                     }
@@ -332,52 +353,51 @@ public class ModEvents {
 
         if(entity != null && !entity.getLevel().isClientSide()){
             String name = event.getCrafting().getDisplayName().getString();
-            CompoundTag displayTag = event.getCrafting().getOrCreateTagElement("display");
 
             switch (opt) {
                 case 1 -> {
                     Component iQualityComponent = Component.literal("[Crafted - Common] "+name).withStyle(ChatFormatting.GRAY);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent));
+                    setItemName(event.getCrafting(),iQualityComponent);
                 }
                 case 2 -> {
                     Component iQualityComponent2 = Component.literal("[Crafted - Uncommon] "+name).withStyle(ChatFormatting.DARK_GRAY);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent2));
+                    setItemName(event.getCrafting(),iQualityComponent2);
                 }
                 case 3 -> {
                     Component iQualityComponent3 = Component.literal("[Crafted - Very Uncommon] "+name).withStyle(ChatFormatting.WHITE);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent3));
+                    setItemName(event.getCrafting(),iQualityComponent3);
                 }
                 case 4 -> {
                     Component iQualityComponent4 = Component.literal("[Crafted - Rare] "+name).withStyle(ChatFormatting.AQUA);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent4));
+                    setItemName(event.getCrafting(),iQualityComponent4);
                 }
                 case 5 -> {
                     Component iQualityComponent5 = Component.literal("[Crafted - Very Rare] "+name).withStyle(ChatFormatting.GREEN);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent5));
+                    setItemName(event.getCrafting(),iQualityComponent5);
                 }
                 case 6 -> {
                     Component iQualityComponent6 = Component.literal("[Crafted - Ultra Rare] "+name).withStyle(ChatFormatting.DARK_AQUA);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent6));
+                    setItemName(event.getCrafting(),iQualityComponent6);
                 }
                 case 7 -> {
                     Component iQualityComponent7 = Component.literal("[Crafted - Ultra Really Rare] "+name).withStyle(ChatFormatting.DARK_GREEN);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent7));
+                    setItemName(event.getCrafting(),iQualityComponent7);
                 }
                 case 8 -> {
                     Component iQualityComponent8 = Component.literal("[Crafted - Epic] "+name).withStyle(ChatFormatting.DARK_PURPLE);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent8));
+                    setItemName(event.getCrafting(),iQualityComponent8);
                 }
                 case 9 -> {
                     Component iQualityComponent9 = Component.literal("[Crafted - Legendary] "+name).withStyle(ChatFormatting.GOLD);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent9));
+                    setItemName(event.getCrafting(),iQualityComponent9);
                 }
                 case 10 -> {
                     Component iQualityComponent10 = Component.literal("[Crafted - Mythic] "+name).withStyle(ChatFormatting.LIGHT_PURPLE);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent10));
+                    setItemName(event.getCrafting(),iQualityComponent10);
                 }
                 case 11 -> {
                     Component iQualityComponent11 = Component.literal("[Crafted - GodLike] "+name).withStyle(ChatFormatting.RED);
-                    displayTag.putString("Name", Component.Serializer.toJson(iQualityComponent11));
+                    setItemName(event.getCrafting(),iQualityComponent11);
                 }
             }
 
@@ -385,15 +405,7 @@ public class ModEvents {
                 entity.getCapability(DexterityProvider.ENTITY_DEXTERITY).ifPresent(extraDamage -> {
                     var customDamage = (1 + (2+(extraDamage.get()*0.0015))*(4.15*0.35)*1.1);
 
-                    ListTag loreTag = new ListTag();
-                    Component loreComponent = Component.literal("Attack damage: " + customDamage).withStyle(ChatFormatting.GREEN);
-                    StringTag loreStringTag = StringTag.valueOf(Component.Serializer.toJson(loreComponent));
-                    loreTag.add(loreStringTag);
-
-                    displayTag.put("Lore", loreTag);
-
-                    Component iDamageComponent = Component.literal(" "+((int)customDamage)).withStyle(ChatFormatting.DARK_GREEN);
-                    displayTag.putString("Damage", Component.Serializer.toJson(iDamageComponent));
+                    setItemLore(event.getCrafting(),"Attack damage:" +customDamage);
 
                     event.getCrafting().setDamageValue((int)customDamage);
                 });
@@ -401,15 +413,7 @@ public class ModEvents {
                 entity.getCapability(DexterityProvider.ENTITY_DEXTERITY).ifPresent(extraDamage -> {
                     var customDamage = (1 + (2+(extraDamage.get()*0.0015))*(4.15*0.35)*1.1);
 
-                    ListTag loreTag = new ListTag();
-                    Component loreComponent = Component.literal("Attack damage: " + customDamage).withStyle(ChatFormatting.GREEN);
-                    StringTag loreStringTag = StringTag.valueOf(Component.Serializer.toJson(loreComponent));
-                    loreTag.add(loreStringTag);
-
-                    Component iDamageComponent = Component.literal(" "+((int)customDamage)).withStyle(ChatFormatting.DARK_GREEN);
-                    displayTag.putString("Damage", Component.Serializer.toJson(iDamageComponent));
-
-                    displayTag.put("Lore", loreTag);
+                    setItemLore(event.getCrafting(),"Attack damage:" +customDamage);
 
                     event.getCrafting().setDamageValue((int)customDamage);
                 });
@@ -417,134 +421,109 @@ public class ModEvents {
                 entity.getCapability(DexterityProvider.ENTITY_DEXTERITY).ifPresent(extraDamage -> {
                     var customDamage = (1+(extraDamage.get()*0.0025))*(2.15*0.25)*1.9;
 
-                    ListTag loreTag = new ListTag();
-                    Component loreComponent = Component.literal("Attack damage: " + customDamage).withStyle(ChatFormatting.GREEN);
-                    StringTag loreStringTag = StringTag.valueOf(Component.Serializer.toJson(loreComponent));
-                    loreTag.add(loreStringTag);
-
-                    Component iDamageComponent = Component.literal(" "+((int)customDamage)).withStyle(ChatFormatting.DARK_GREEN);
-                    displayTag.putString("Damage", Component.Serializer.toJson(iDamageComponent));
-
-                    displayTag.put("Lore", loreTag);
+                    setItemLore(event.getCrafting(),"Attack damage:" +customDamage);
 
                     event.getCrafting().setDamageValue((int)customDamage);
                 });
             }else{
-                Component iDamageComponent = Component.literal(" "+(event.getCrafting().getDamageValue())).withStyle(ChatFormatting.DARK_GREEN);
-                displayTag.putString("Damage", Component.Serializer.toJson(iDamageComponent));
+                setItemLore(event.getCrafting(),""+(event.getCrafting().getDamageValue()));
             }
         }
-    }
-
-    @SubscribeEvent
-    public static void onRenderTooltip(RenderTooltipEvent event) {
-        /*
-        ItemStack itemStack = event.getItemStack();
-        CompoundTag displayTag = itemStack.getOrCreateTagElement("display");
-
-        if (displayTag.contains("Name", 8)) {
-            event.getFont().wordWrapHeight(displayTag.getString("Name"),1);
-        }
-        if (displayTag.contains("Lore", 9)) {
-            ListTag loreTag = displayTag.getList("Lore", 8);
-            for (Tag loreEntryTag : loreTag) {
-                if (loreEntryTag instanceof StringTag) {
-                    event.getFont().wordWrapHeight(loreEntryTag.getAsString(),5);
-                }
-            }
-        }
-        */
     }
 
     @SubscribeEvent
     public static void onLivingHealEvent(LivingHealEvent event){
-
-        if(event.getEntity() != null){
-            event.getEntity().getCapability(LifeRegenerationProvider.ENTITY_LIFEREGENERATION).ifPresent(hpregen ->{
-                event.setCanceled(true);
-            });
+        if(event.getEntity() != null&& !event.getEntity().getLevel().isClientSide()){
+            event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     public static void onLivingEntityUpdate(LivingEvent.LivingTickEvent event){
         if(event.getEntity() != null && !event.getEntity().getLevel().isClientSide()){
-            if (event.getEntity() instanceof Player || event.getEntity() instanceof Monster || event.getEntity() instanceof Animal) {
-
-                event.getEntity().getCapability(CustomLevelProvider.ENTITY_CUSTOMLEVEL).ifPresent(customLevel ->{
-                    event.getEntity().getCapability(ExperienceProvider.ENTITY_EXPERIENCE).ifPresent(exp ->{
+            LivingEntity entity = event.getEntity();
+            if (entity instanceof Player || entity instanceof Monster || entity instanceof Animal) {
+                entity.getCapability(CustomLevelProvider.ENTITY_CUSTOMLEVEL).ifPresent(customLevel ->{
+                    entity.getCapability(ExperienceProvider.ENTITY_EXPERIENCE).ifPresent(exp ->{
                         if(exp.get() >= customLevel.experienceNeeded()){
                             double need = customLevel.experienceNeeded();
                             exp.consume(need);
                             customLevel.add();
                             customLevel.setPreviousLevelExp(need);
-                            if(event.getEntity() instanceof Player){
-                                event.getEntity().sendSystemMessage(Component.translatable(MESSAGE_LEVEL_UP));
-                                event.getEntity().getCapability(LifeProvider.ENTITY_LIFE).ifPresent(life ->{
+                            if(entity instanceof Player){
+                                entity.sendSystemMessage(Component.translatable(MESSAGE_LEVEL_UP));
+                                entity.getCapability(LifeProvider.ENTITY_LIFE).ifPresent(life ->{
                                     life.increaseMax(0.025);
-                                    event.getEntity().setHealth((float)life.getMax());
+                                    life.set(life.getMax());
                                 });
 
-                                event.getEntity().getCapability(AgilityProvider.ENTITY_AGILITY).ifPresent(agility ->{
-                                    agility.add((agility.get()*0.0000005));
-                                    event.getEntity().setSpeed(event.getEntity().getSpeed() + (float)(agility.get()*0.0000005));
+                                entity.getCapability(AgilityProvider.ENTITY_AGILITY).ifPresent(agility ->{
+                                    agility.add((agility.get()*0.000005));
                                 });
 
-                                event.getEntity().getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana ->{
+                                entity.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana ->{
                                     mana.increaseMax(Math.random()+0.1);
+                                    mana.set(mana.getMax());
                                 });
 
-                                event.getEntity().getCapability(CommandProvider.ENTITY_COMMAND).ifPresent(stat ->{
+                                entity.getCapability(CommandProvider.ENTITY_COMMAND).ifPresent(stat ->{
                                     stat.add(Math.random());
                                 });
 
-                                event.getEntity().getCapability(DefenseProvider.ENTITY_DEFENSE).ifPresent(stat ->{
+                                entity.getCapability(DefenseProvider.ENTITY_DEFENSE).ifPresent(stat ->{
                                     stat.add(Math.random());
                                 });
 
-                                event.getEntity().getCapability(DexterityProvider.ENTITY_DEXTERITY).ifPresent(stat ->{
+                                entity.getCapability(DexterityProvider.ENTITY_DEXTERITY).ifPresent(stat ->{
                                     stat.add(Math.random());
                                 });
 
-                                event.getEntity().getCapability(IntelligenceProvider.ENTITY_INTELLIGENCE).ifPresent(stat ->{
+                                entity.getCapability(IntelligenceProvider.ENTITY_INTELLIGENCE).ifPresent(stat ->{
                                     stat.add(Math.random());
                                 });
 
-                                event.getEntity().getCapability(LifeRegenerationProvider.ENTITY_LIFEREGENERATION).ifPresent(stat ->{
+                                entity.getCapability(LifeRegenerationProvider.ENTITY_LIFEREGENERATION).ifPresent(stat ->{
                                     stat.add(0.0025);
                                 });
 
-                                event.getEntity().getCapability(LuckProvider.ENTITY_LUCK).ifPresent(stat ->{
+                                entity.getCapability(LuckProvider.ENTITY_LUCK).ifPresent(stat ->{
                                     stat.add(Math.random());
                                 });
 
-                                event.getEntity().getCapability(ManaRegenerationProvider.ENTITY_MANAREGENERATION).ifPresent(stat ->{
+                                entity.getCapability(ManaRegenerationProvider.ENTITY_MANAREGENERATION).ifPresent(stat ->{
                                     stat.add(0.0055);
                                 });
 
-                                event.getEntity().getCapability(StrengthProvider.ENTITY_STRENGTH).ifPresent(stat ->{
+                                entity.getCapability(StrengthProvider.ENTITY_STRENGTH).ifPresent(stat ->{
                                     stat.add(Math.random());
                                 });
                             }
                         }
-
-                        event.getEntity().getCapability(ManaRegenerationProvider.ENTITY_MANAREGENERATION).ifPresent( mpRegen -> event.getEntity().getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> {
-                            if(mana.get() < mana.getMax()){
-                                mana.add(mpRegen.get()*0.002);
-                            }
-                        }));
-
-                        event.getEntity().getCapability(LifeRegenerationProvider.ENTITY_LIFEREGENERATION).ifPresent( hpRegen ->  event.getEntity().getCapability(LifeProvider.ENTITY_LIFE).ifPresent(life -> {
-                            if(life.get() < life.getMax()){
-                                life.add(hpRegen.get()*0.0012);
-                            }}));
-
                     });
                 });
-
+                entity.getCapability(LifeProvider.ENTITY_LIFE).ifPresent(hp ->{
+                    entity.setHealth((float)hp.get());
+                    if(hp.get() <= 0){
+                        entity.die(DamageSource.GENERIC);
+                            Level world = event.getEntity().level;
+                            Entity.RemovalReason removalReason = Entity.RemovalReason.DISCARDED;
+                            event.getEntity().discard();
+                            world.getProfiler().push("entityDestruction");
+                            event.getEntity().remove(removalReason);
+                            world.getProfiler().pop();
+                    }
+                });
+                entity.getCapability(ManaRegenerationProvider.ENTITY_MANAREGENERATION).ifPresent( mpRegen -> entity.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> {
+                    if(mana.get() < mana.getMax()){
+                        mana.add(mpRegen.get()*0.05);
+                    }
+                }));
+                entity.getCapability(LifeRegenerationProvider.ENTITY_LIFEREGENERATION).ifPresent( hpRegen ->  entity.getCapability(LifeProvider.ENTITY_LIFE).ifPresent(life -> {
+                    if(life.get() < life.getMax()){
+                        life.add(hpRegen.get()*0.05);
+                    }}));
             }
         }
-
     }
 
     @SubscribeEvent
@@ -581,7 +560,7 @@ public class ModEvents {
                             if (multiplier == 0.0) {
                                 entity.sendSystemMessage(Component.translatable(MESSAGE_LEVEL_TOO_HIGH).withStyle(ChatFormatting.DARK_RED));
                             }else{
-                                entity.sendSystemMessage(Component.literal("Obtained experience: " + (int)(exp * multiplier)));
+                                entity.sendSystemMessage(Component.literal("Obtained experience: " + formatDouble(exp * multiplier)));
                             }
                     });
                 });
@@ -591,12 +570,7 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
-
-        if(event.getEntity() instanceof Player player && !event.getLevel().isClientSide()){
-            player.getCapability(CustomLevelProvider.ENTITY_CUSTOMLEVEL).ifPresent(lvl ->{
-                player.sendSystemMessage(Component.literal("Welcome, enjoy"));
-            });
-        } else if (event.getEntity() instanceof LivingEntity livingEntity && !event.getLevel().isClientSide()) {
+        if (!(event.getEntity() instanceof Player) && event.getEntity() instanceof LivingEntity livingEntity && !event.getLevel().isClientSide()) {
 
             Level level = livingEntity.getLevel();
             long levelTime = level.getLevelData().getDayTime();
@@ -650,20 +624,24 @@ public class ModEvents {
 
                 int finalLevel = entityClass + (int)Math.floor(distanceLevel + difficultyLevel + timeLevel + connectedPlayers + dimensionLevel + hardcoreLevel + (float)(averageCustomLevel / 10));
 
+                if(timeLevel < 2){
+                   lvlReduce = finalLevel;
+                }
+
                 livingEntity.getCapability(CustomLevelProvider.ENTITY_CUSTOMLEVEL).ifPresent(entityLevel ->{
 
                     livingEntity.getCapability(LifeProvider.ENTITY_LIFE).ifPresent(life ->{
                         Random random = new Random();
-                        int randomNumber = random.nextInt(8) + 1;
-                        entityLevel.setLevel(finalLevel+randomNumber);
+                        int randomNumber = random.nextInt(10) + 1;
+                        entityLevel.setLevel((finalLevel-lvlReduce)+randomNumber);
                     });
                     event.getEntity().getCapability(LifeProvider.ENTITY_LIFE).ifPresent(life ->{
-                        livingEntity.setHealth((float)(life.getMax()*entityLevel.get()));
-                        event.getEntity().setCustomName(Component.literal("["+entityLevel.get()+"] "+event.getEntity().getName().getString()+"Total Life: "+formatDouble(life.getMax()*entityLevel.get())));
+                        life.setMax(((LivingEntity) event.getEntity()).getHealth()+(entityLevel.get()*0.001));
+                        event.getEntity().setCustomName(Component.literal("["+entityLevel.get()+"] "+event.getEntity().getName().getString()+" Total Life: "+formatDouble(life.getMax())));
                     });
 
                     event.getEntity().getCapability(AgilityProvider.ENTITY_AGILITY).ifPresent(agility ->{
-                        livingEntity.setSpeed( livingEntity.getSpeed() + (float)(agility.get()*entityLevel.get()*0.0000005));
+                        agility.add(agility.get()*entityLevel.get()*0.0000005);
                     });
 
                     event.getEntity().getCapability(ManaProvider.ENTITY_MANA).ifPresent(stat ->{

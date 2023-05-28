@@ -16,6 +16,9 @@ public class Mana {
     public double getMin(){
         return MIN_MANA_VALUE;
     }
+    public void set(double value){
+        mana = value;
+    }
     public void increaseMax(double value){
         MAX_MANA_VALUE = MAX_MANA_VALUE + value;
     }
@@ -28,11 +31,11 @@ public class Mana {
     }
     public void add(double value){
         double check = this.mana + value;
-        if(this.mana < MAX_MANA_VALUE){
+        if(mana < MAX_MANA_VALUE){
             if(check > MAX_MANA_VALUE){
                 check = Math.abs(check - MAX_MANA_VALUE);
             }
-           this.mana = check;
+           mana = check;
         }
     }
     public void copyFrom(Mana source){
@@ -49,6 +52,6 @@ public class Mana {
         if(check < MIN_MANA_VALUE){
             check = MIN_MANA_VALUE;
         }
-        this.mana = check;
+        mana = check;
     }
 }

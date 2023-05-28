@@ -13,8 +13,12 @@ public class Life {
     public double getMax(){
         return MAX_LIFE_VALUE;
     }
+    public void setMax(double value){MAX_LIFE_VALUE = value;}
     public double getMin(){
         return MIN_LIFE_VALUE;
+    }
+    public void set(double value){
+        life = value;
     }
     public void increaseMax(double value){
         MAX_LIFE_VALUE = MAX_LIFE_VALUE + value;
