@@ -7,6 +7,8 @@ import net.cheto97.rpgcraftmod.customstats.*;
 import net.cheto97.rpgcraftmod.item.ModItems;
 import net.cheto97.rpgcraftmod.modsystem.Customlevel;
 import net.cheto97.rpgcraftmod.modsystem.Experience;
+import net.cheto97.rpgcraftmod.networking.ModMessages;
+import net.cheto97.rpgcraftmod.networking.packet.ManaDataSyncS2CPacket;
 import net.cheto97.rpgcraftmod.providers.*;
 import net.cheto97.rpgcraftmod.villager.ModVillagers;
 import net.minecraft.ChatFormatting;
@@ -16,6 +18,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,11 +32,13 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
 
@@ -316,10 +321,10 @@ public class ModEvents {
     public static void onPotionUsed(LivingEntityUseItemEvent event) {
         var item = event.getItem();
         if(item.getItem() instanceof PotionItem && event.getEntity() != null){
-            if(event.getEntity() instanceof Player){
+            if(event.getEntity() instanceof Player && !event.getEntity().level.isClientSide()){
                 event.getEntity().getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> {
-                    if(mana.get() >= 10.0){
-                        mana.consumeMana(10);
+                    if(mana.get() >= (double)5){
+                        mana.consumeMana(5);
                     }else{
                         event.setCanceled(true);
                         (event.getEntity()).sendSystemMessage(Component.translatable(MESSAGE_NO_ENOUGH_MANA).withStyle(ChatFormatting.DARK_RED));
@@ -464,6 +469,7 @@ public class ModEvents {
                                 entity.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana ->{
                                     mana.increaseMax(Math.random()+0.1);
                                     mana.set(mana.getMax());
+                                    ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(mana.get()),(ServerPlayer) entity);
                                 });
 
                                 entity.getCapability(CommandProvider.ENTITY_COMMAND).ifPresent(stat ->{
@@ -502,15 +508,9 @@ public class ModEvents {
                     });
                 });
                 entity.getCapability(LifeProvider.ENTITY_LIFE).ifPresent(hp ->{
-                    entity.setHealth((float)hp.get());
                     if(hp.get() <= 0){
+                        entity.setHealth(0.0f);
                         entity.die(DamageSource.GENERIC);
-                            Level world = event.getEntity().level;
-                            Entity.RemovalReason removalReason = Entity.RemovalReason.DISCARDED;
-                            event.getEntity().discard();
-                            world.getProfiler().push("entityDestruction");
-                            event.getEntity().remove(removalReason);
-                            world.getProfiler().pop();
                     }
                 });
                 entity.getCapability(ManaRegenerationProvider.ENTITY_MANAREGENERATION).ifPresent( mpRegen -> entity.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> {
@@ -523,6 +523,52 @@ public class ModEvents {
                         life.add(hpRegen.get()*0.05);
                     }}));
             }
+        }
+    }
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event){
+        if(event.side == LogicalSide.SERVER){
+            event.player.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(mana.get()),(ServerPlayer)event.player);
+            });
+            /*
+            event.player.getCapability(LifeProvider.ENTITY_LIFE).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(AgilityProvider.ENTITY_AGILITY).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(CommandProvider.ENTITY_COMMAND).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(DefenseProvider.ENTITY_DEFENSE).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(DexterityProvider.ENTITY_DEXTERITY).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(IntelligenceProvider.ENTITY_INTELLIGENCE).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(LifeRegenerationProvider.ENTITY_LIFEREGENERATION).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(LuckProvider.ENTITY_LUCK).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(ManaRegenerationProvider.ENTITY_MANAREGENERATION).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(StrengthProvider.ENTITY_STRENGTH).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(CustomLevelProvider.ENTITY_CUSTOMLEVEL).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            event.player.getCapability(ExperienceProvider.ENTITY_EXPERIENCE).ifPresent(stat ->{
+                ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(stat.get()),(ServerPlayer)event.player);
+            });
+            */
         }
     }
 
@@ -570,14 +616,15 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
-        if (!(event.getEntity() instanceof Player) && event.getEntity() instanceof LivingEntity livingEntity && !event.getLevel().isClientSide()) {
+        if(!event.getLevel().isClientSide()){
+            if (!(event.getEntity() instanceof Player) && event.getEntity() instanceof LivingEntity livingEntity) {
 
-            Level level = livingEntity.getLevel();
-            long levelTime = level.getLevelData().getDayTime();
-            int timeLevel = (int) (levelTime / 24000) / 5;
-            double naturalSpawnX = level.getSharedSpawnPos().getX();
-            double naturalSpawnZ = level.getSharedSpawnPos().getZ();
-            int distanceLevel = (int) (Math.abs(livingEntity.getX() - naturalSpawnX) + Math.abs(livingEntity.getZ() - naturalSpawnZ)) / 100;
+                Level level = livingEntity.getLevel();
+                long levelTime = level.getLevelData().getDayTime();
+                int timeLevel = (int) (levelTime / 24000) / 5;
+                double naturalSpawnX = level.getSharedSpawnPos().getX();
+                double naturalSpawnZ = level.getSharedSpawnPos().getZ();
+                int distanceLevel = (int) (Math.abs(livingEntity.getX() - naturalSpawnX) + Math.abs(livingEntity.getZ() - naturalSpawnZ)) / 100;
                 Difficulty difficulty = level.getDifficulty();
                 int difficultyLevel = switch (difficulty) {
                     case PEACEFUL -> 1;
@@ -592,7 +639,7 @@ public class ModEvents {
                 int entityClass = 1;
                 if(containsIgnoreCase(event.getEntity().getType().toString(),"dragon") ){
                     entityClass = 50;
-            }else if(containsIgnoreCase(event.getEntity().getType().toString(), "wither")){
+                }else if(containsIgnoreCase(event.getEntity().getType().toString(), "wither")){
                     if(containsIgnoreCase(event.getEntity().getName().getString(),"skeleton")){
                         entityClass = 2;
                     }else{
@@ -625,7 +672,7 @@ public class ModEvents {
                 int finalLevel = entityClass + (int)Math.floor(distanceLevel + difficultyLevel + timeLevel + connectedPlayers + dimensionLevel + hardcoreLevel + (float)(averageCustomLevel / 10));
 
                 if(timeLevel < 2){
-                   lvlReduce = finalLevel;
+                    lvlReduce = finalLevel;
                 }
 
                 livingEntity.getCapability(CustomLevelProvider.ENTITY_CUSTOMLEVEL).ifPresent(entityLevel ->{
@@ -636,12 +683,11 @@ public class ModEvents {
                         entityLevel.setLevel((finalLevel-lvlReduce)+randomNumber);
                     });
                     event.getEntity().getCapability(LifeProvider.ENTITY_LIFE).ifPresent(life ->{
-                        life.setMax(((LivingEntity) event.getEntity()).getHealth()+(entityLevel.get()*0.001));
-                        event.getEntity().setCustomName(Component.literal("["+entityLevel.get()+"] "+event.getEntity().getName().getString()+" Total Life: "+formatDouble(life.getMax())));
+                        life.setMax(((LivingEntity) event.getEntity()).getHealth()+(entityLevel.get()*0.01));
                     });
 
                     event.getEntity().getCapability(AgilityProvider.ENTITY_AGILITY).ifPresent(agility ->{
-                        agility.add(agility.get()*entityLevel.get()*0.0000005);
+                        agility.add(agility.get()*entityLevel.get()*0.0005);
                     });
 
                     event.getEntity().getCapability(ManaProvider.ENTITY_MANA).ifPresent(stat ->{
@@ -653,7 +699,7 @@ public class ModEvents {
                     });
 
                     event.getEntity().getCapability(DefenseProvider.ENTITY_DEFENSE).ifPresent(stat ->{
-                        stat.add(entityLevel.get()/40);
+                        stat.add(entityLevel.get()/100);
                     });
 
                     event.getEntity().getCapability(DexterityProvider.ENTITY_DEXTERITY).ifPresent(stat ->{
@@ -680,6 +726,13 @@ public class ModEvents {
                     });
 
                 });
+            }
+            else if(event.getEntity() instanceof ServerPlayer player){
+                player.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> {
+                    ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(mana.get()),player);
+                });
+            }
         }
+
     }
 }

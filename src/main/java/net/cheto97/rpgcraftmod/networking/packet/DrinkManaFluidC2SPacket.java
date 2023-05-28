@@ -1,5 +1,6 @@
 package net.cheto97.rpgcraftmod.networking.packet;
 
+import net.cheto97.rpgcraftmod.networking.ModMessages;
 import net.cheto97.rpgcraftmod.providers.ManaProvider;
 import net.cheto97.rpgcraftmod.providers.ManaRegenerationProvider;
 import net.minecraft.ChatFormatting;
@@ -47,9 +48,13 @@ public class DrinkManaFluidC2SPacket {
 
                                 mana.add(mpRegen.get()*7);
                             }
+                            ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(mana.get()), player);
                         });
                     }else{
-                        player.sendSystemMessage(Component.translatable(MESSAGE_NO_MANA_FLUID_NEAR).withStyle(ChatFormatting.RED));
+                        player.getCapability(ManaProvider.ENTITY_MANA).ifPresent(mana -> {
+                            player.sendSystemMessage(Component.translatable(MESSAGE_NO_MANA_FLUID_NEAR).withStyle(ChatFormatting.RED));
+                            ModMessages.sendToPlayer(new ManaDataSyncS2CPacket(mana.get()), player);
+                        });
                     }
                 });
 
