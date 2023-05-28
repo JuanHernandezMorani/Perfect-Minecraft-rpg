@@ -1,31 +1,31 @@
 package net.cheto97.rpgcraftmod.networking.packet;
 
-import net.cheto97.rpgcraftmod.client.ClientManaData;
+import net.cheto97.rpgcraftmod.client.ClientAgilityData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public class ManaDataSyncS2CPacket {
-    private final double mana;
+public class AgilityDataSyncS2CPacket {
+    private final double agility;
 
-    public ManaDataSyncS2CPacket(double mana){
-        this.mana = mana;
+    public AgilityDataSyncS2CPacket(double agility){
+        this.agility = agility;
     }
 
-    public ManaDataSyncS2CPacket(FriendlyByteBuf buf){
-        this.mana = buf.readDouble();
+    public AgilityDataSyncS2CPacket(FriendlyByteBuf buf){
+        this.agility = buf.readDouble();
     }
 
     public void toBytes(FriendlyByteBuf buf){
-        buf.writeDouble(mana);
+        buf.writeDouble(agility);
     }
 
     public boolean handle(@NotNull Supplier<NetworkEvent.Context> supplier){
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
-            ClientManaData.set(mana);
+            ClientAgilityData.set(agility);
         });
         return true;
     }

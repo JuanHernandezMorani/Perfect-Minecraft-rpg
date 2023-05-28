@@ -3,7 +3,7 @@ package net.cheto97.rpgcraftmod.customstats;
 import net.minecraft.nbt.CompoundTag;
 
 public class Mana {
-    private double mana = 0;
+    private double mana = 10;
     private final double MIN_MANA_VALUE = 0;
     private double MAX_MANA_VALUE = 10;
 
@@ -30,12 +30,12 @@ public class Mana {
         MAX_MANA_VALUE = 10;
     }
     public void add(double value){
-        double check = this.mana + value;
+        double check = mana + value;
         if(mana < MAX_MANA_VALUE){
             if(check > MAX_MANA_VALUE){
-                check = Math.abs(check - MAX_MANA_VALUE);
+                check = MAX_MANA_VALUE;
             }
-           mana = check;
+           this.mana = check;
         }
     }
     public void copyFrom(Mana source){
@@ -52,6 +52,6 @@ public class Mana {
         if(check < MIN_MANA_VALUE){
             check = MIN_MANA_VALUE;
         }
-        mana = check;
+        this.mana = check;
     }
 }

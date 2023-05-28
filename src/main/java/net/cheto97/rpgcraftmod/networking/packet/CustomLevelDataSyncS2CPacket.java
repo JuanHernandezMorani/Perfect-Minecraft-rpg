@@ -1,31 +1,31 @@
 package net.cheto97.rpgcraftmod.networking.packet;
 
-import net.cheto97.rpgcraftmod.client.ClientManaData;
+import net.cheto97.rpgcraftmod.client.ClientCustomLevelData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public class ManaDataSyncS2CPacket {
-    private final double mana;
+public class CustomLevelDataSyncS2CPacket {
+    private final double customlevel;
 
-    public ManaDataSyncS2CPacket(double mana){
-        this.mana = mana;
+    public CustomLevelDataSyncS2CPacket(double customlevel){
+        this.customlevel = customlevel;
     }
 
-    public ManaDataSyncS2CPacket(FriendlyByteBuf buf){
-        this.mana = buf.readDouble();
+    public CustomLevelDataSyncS2CPacket(FriendlyByteBuf buf){
+        this.customlevel = buf.readDouble();
     }
 
     public void toBytes(FriendlyByteBuf buf){
-        buf.writeDouble(mana);
+        buf.writeDouble(customlevel);
     }
 
     public boolean handle(@NotNull Supplier<NetworkEvent.Context> supplier){
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
-            ClientManaData.set(mana);
+            ClientCustomLevelData.set(customlevel);
         });
         return true;
     }

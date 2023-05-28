@@ -34,7 +34,7 @@ public class Life {
         double check = this.life + value;
         if(this.life < MAX_LIFE_VALUE){
             if(check > MAX_LIFE_VALUE){
-                check = Math.abs(check - MAX_LIFE_VALUE);
+                check = MAX_LIFE_VALUE;
             }
             this.life = check;
         }
